@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Perpustakaan Terintegrasi</title>
+    <style>
+        /* --- RESET & BASE STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: row;
+        }
+
+        /* --- SIDEBAR NAVIGASI UTAMA --- */
+        .sidebar {
+            width: 260px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: yellow;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            display: block;
+            padding: 12px 15px;
+            border-radius: 5px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: #34495e;
+            color: #ffffff;
+            border-left: 4px solid #3498db;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px;
+            background-color: #f4f6f9;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            color: #2c3e50;
+        }
+
+        /* --- TAB MANAGEMENT --- */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- CARD BOX CONTAINER --- */
+        .card-box {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .card-box h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f4f6f9;
+        }
+
+        /* --- FORM GRID DESIGN --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #fcfcfc;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: #fff;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            height: 41px;
+        }
+
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-success:hover { background-color: #27ae60; }
+
+        .btn-warning { background-color: #f1c40f; color: #333; padding: 5px 10px; font-size: 12px; height: auto; margin-right: 5px; }
+        .btn-warning:hover { background-color: #f39c12; }
+
+        .btn-danger { background-color: #e74c3c; color: white; padding: 5px 10px; font-size: 12px; height: auto; }
+        .btn-danger:hover { background-color: #c0392b; }
+
+        /* --- BADGES STATUS --- */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-waiting { background-color: #ffeaa7; color: #d63031; }
+        .badge-success { background-color: #c8f7dc; color: #1e824c; }
+
+        /* --- TABLES --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 10px;
+            min-width: 600px; /* Memastikan tabel tidak gepeng di layar kecil */
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        table tr:hover { background-color: #f8fafc; }
+
+        /* --- LAYOUT KARTU ANGGOTA --- */
+        .card-flex-wrapper {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .form-side { flex: 1; min-width: 300px; }
+        .preview-side { 
+            flex: 1; 
+            min-width: 300px; 
+            background-color: #f8fafc; 
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #cbd5e1;
+        }
+
+        /* --- DESAIN ID CARD --- */
+        .id-card {
+            width: 350px;
+            height: 220px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 14px;
+            padding: 15px 20px;
+            box-shadow: 0 8px 20px rgba(30, 60, 114, 0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .id-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .id-card h4 { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+        .id-card .sub-title { font-size: 9px; color: #cbd5e1; }
+
+        .card-main { display: flex; align-items: center; gap: 15px; margin-top: -5px; }
+        .card-avatar {
+            width: 65px; height: 75px; background-color: #e2e8f0;
+            border-radius: 6px; border: 2px solid white;
+            display: flex; justify-content: center; align-items: center;
+            color: #333; font-size: 30px;
+            overflow: hidden;
+        }
+        .card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-info p { font-size: 11px; color: #e2e8f0; margin-bottom: 2px; }
+        .card-info span { font-size: 13px; font-weight: bold; color: #ffffff; display: block; }
+        .card-info span.highlight { color: #f1c40f; }
+
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; }
+        .barcode {
+            height: 25px; width: 100px;
+            background: linear-gradient(90deg, #fff 2px, transparent 2px, #fff 4px, transparent 4px, #fff 7px, transparent 7px, #fff 9px, transparent 9px, #fff 12px, transparent 12px);
+            background-size: 15px 100%; opacity: 0.8;
+        }
+        .card-valid { font-size: 9px; text-align: right; color: #cbd5e1; }
+
+        /* --- SISI BELAKANG KARTU --- */
+        .id-card-back {
+            padding: 15px;
+        }
+        .id-card-back h5 {
+            font-size: 11px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .rules-list {
+            list-style: none;
+            font-size: 9px;
+            line-height: 1.4;
+        }
+        .rules-list li {
+            margin-bottom: 4px;
+            padding-left: 12px;
+            position: relative;
+            text-align: justify;
+        }
+        .rules-list li::before {
+            content: "•";
+            position: absolute;
+            left: 2px;
+            color: #f1c40f;
+            font-weight: bold;
+        }
+
+        /* --- MEDIA QUERY: TAMPILAN HP / LAYAR KECIL (< 768px) --- */
+        @media screen and (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 15px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+
+            .sidebar h2 {
+                margin-bottom: 15px;
+                font-size: 16px;
+            }
+
+            /* Mengubah menu menjadi list horizontal yang bisa di-scroll ke samping di HP */
+            .sidebar ul {
+                display: flex;
+                overflow-x: auto;
+                white-space: nowrap;
+                gap: 8px;
+                padding-bottom: 5px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .sidebar ul li {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .sidebar ul li a {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .sidebar ul li a:hover, .sidebar ul li a.active {
+                border-left: none;
+                border-bottom: 3px solid #3498db;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px 15px;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            .card-box {
+                padding: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr; /* Form jadi 1 kolom penuh ke bawah di HP */
+                gap: 15px;
+            }
+
+            .form-group button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            /* Agar ID Card preview pas di layar HP */
+            .id-card {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+
+        /* --- OPTIMASI PRINT --- */
+        @media print {
+            body * { 
+                visibility: hidden; 
+            }
+            
+            .preview-side, .preview-side * { 
+                visibility: visible; 
+            }
+            
+            .preview-side > p, #btnPrint { 
+                display: none !important; 
+            }
+            
+            .preview-side { 
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none; 
+                background: none; 
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: center !important;
+                gap: 20px !important;
+                padding: 0;
+                margin-top: 60px;
+            }
+            
+            .id-card {
+                box-shadow: none; 
+                border: 1px solid #222;
+                display: flex !important;
+                margin: 0 !important;
+                width: 350px !important;
+                height: 220px !important;
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Pustaka Digital <br> SMP HAMALATUL QURAN</h2>
+        <ul>
+            <li><a class="nav-link active" onclick="switchTab('menu-buku')">Input Buku</a></li>
+            <li><a class="nav-link" onclick="switchTab('menu-peminjam')">Peminjaman</a></li>
+            <li><a class="nav-link" onclick="switchTab('menu-anggota')">Input Anggota</a></li>
+            <li><a class="nav-link" onclick="switchTab('menu-kartu')">Buat Kartu</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+
+        <div id="menu-buku" class="tab-content active">
+            <header><h1>Sistem Manajemen Data Buku</h1></header>
+            
+            <div class="card-box">
+                <h2>Input Buku Baru</h2>
+                <form id="bookForm" onsubmit="tambahBuku(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="judul">Judul Buku</label>
+                            <input type="text" id="judul" placeholder="Masukkan judul buku" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="penulis">Penulis / Pengarang</label>
+                            <input type="text" id="penulis" placeholder="Nama penulis" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tahun">Tahun Terbit</label>
+                            <input type="number" id="tahun" min="1900" max="2026" placeholder="Contoh: 2024" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="stok">Jumlah Stok</label>
+                            <input type="number" id="stok" min="1" placeholder="Jumlah buku" required>
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <button type="submit" class="btn btn-primary">Tambah Buku</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h2>Katalog Data Buku</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Buku</th>
+                                <th>Judul Buku</th>
+                                <th>Penulis</th>
+                                <th>Tahun Terbit</th>
+                                <th>Stok</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookTableBody">
+                            <tr>
+                                <td>B-1001</td>
+                                <td><strong>Laskar Pelangi</strong></td>
+                                <td>Andrea Hirata</td>
+                                <td>2005</td>
+                                <td>5</td>
+                                <td><button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-peminjam" class="tab-content">
+            <header><h1>Sistem Input Peminjaman Buku</h1></header>
+
+            <div class="card-box">
+                <h2>Tambah Data Peminjaman</h2>
+                <form id="loanForm" onsubmit="tambahPeminjam(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="namaPeminjam">Nama Peminjam</label>
+                            <input type="text" id="namaPeminjam" placeholder="Contoh: Ahmad Fauzi" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="judulPinjam">Judul Buku</label>
+                            <input type="text" id="judulPinjam" placeholder="Contoh: Laskar Pelangi" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kategoriPinjam">Kategori</label>
+                            <select id="kategoriPinjam" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="Fiksi">Fiksi</option>
+                                <option value="Edukasi/Teknologi">Edukasi / Teknologi</option>
+                                <option value="Sains">Sains</option>
+                                <option value="Novel">Novel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggalPinjam">Tanggal Pinjam</label>
+                            <input type="date" id="tanggalPinjam" required>
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <button type="submit" class="btn btn-success">Simpan Data</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h2>Daftar Buku yang Sedang Dipinjam</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Nama Peminjam</th>
+                                <th>Judul Buku</th>
+                                <th>Kategori</th>
+                                <th>Tanggal Pinjam</th>
+                                <th>Status Buku</th>
+                                <th>Penerima Buku</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookTableBodyLoan">
+                            <tr>
+                                <td>1</td>
+                                <td><strong>Rian Ardiansyah</strong></td>
+                                <td>Pemrograman Web Modern</td>
+                                <td>Edukasi/Teknologi</td>
+                                <td>2026-05-31</td>
+                                <td><span class="badge badge-waiting">Masih Dipinjam</span></td>
+                                <td class="nama-penerima">-</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="kembalikanBuku(this)">Kembalikan</button>
+                                    <button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-anggota" class="tab-content">
+            <header><h1>Sistem Manajemen Data Anggota</h1></header>
+
+            <div class="card-box">
+                <h2>Input Anggota Baru</h2>
+                <form id="formAnggota" onsubmit="tambahAnggota(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="namaAnggota">Nama Lengkap</label>
+                            <input type="text" id="namaAnggota" placeholder="Nama lengkap" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="statusAnggota">Status Anggota</label>
+                            <select id="statusAnggota" required>
+                                <option value="Siswa">Siswa</option>
+                                <option value="Guru">Guru</option>
+                                <option value="Umum">Umum</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="kontakAnggota">Email / No. HP</label>
+                            <input type="text" id="kontakAnggota" placeholder="08xxxxxx atau email" required>
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <button type="submit" class="btn btn-success">Daftarkan Anggota</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h2>Daftar Anggota Perpustakaan</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Anggota</th>
+                                <th>Nama Lengkap</th>
+                                <th>Status</th>
+                                <th>Kontak</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelAnggotaBody">
+                            <tr>
+                                <td>A-001</td>
+                                <td>Rian Ardiansyah</td>
+                                <td>Siswa</td>
+                                <td>08123456789</td>
+                                <td><button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-kartu" class="tab-content">
+            <header><h1>Sistem Pembuat Kartu Anggota</h1></header>
+            
+            <div class="card-flex-wrapper">
+                <div class="card-box form-side">
+                    <h2>Form Isian Kartu</h2>
+                    <form id="memberForm" onsubmit="generateCard(event)">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="inputNama">Nama Lengkap</label>
+                            <input type="text" id="inputNama" placeholder="Contoh: Muhammad Rafli" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="inputStatus">Status / Jabatan</label>
+                            <select id="inputStatus" required>
+                                <option value="Siswa / Mahasiswa">Siswa </option>
+                                <option value="Guru / Dosen">Guru / Dosen</option>
+                                <option value="Petugas Perpus">Petugas Perpustakaan</option>
+                                <option value="Umum">Umum</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="inputInstansi">Nama Instansi / Sekolah</label>
+                            <input type="text" id="inputInstansi" placeholder="Contoh: SMA Negeri 1 Jakarta" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="inputFoto">Foto Anggota (Format: JPG/PNG)</label>
+                            <input type="file" id="inputFoto" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%">Buat Kartu Sekarang</button>
+                    </form>
+                </div>
+
+                <div class="preview-side">
+                    <p style="font-size:12px; color:#7f8c8d; margin-bottom:15px; font-weight:bold; text-transform:uppercase;">Preview Kartu Anggota</p>
+                    
+                    <div class="id-card" id="idCard">
+                        <div> 
+                            <h4>KARTU ANGGOTA PERPUSTAKAAN <br> SMP HAMALATUL QURAN </h4>
+                            <p id="cardInstansi" class="sub-title">KARTU ANGGOTA PERPUSTAKAAN</p>
+                        </div>
+                        
+                        <div class="card-main">
+                            <div class="card-avatar" id="cardAvatarBox">👤</div>
+                            <div class="card-info">
+                                <p>ID ANGGOTA <span id="cardId" class="highlight">REG-2026001</span></p>
+                                <p>NAMA LENGKAP <span id="cardNama">NAMA PREVIEW</span></p>
+                                <p>STATUS <span id="cardStatus">STATUS PREVIEW</span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="card-bottom">
+                            <div class="barcode"></div>
+                            <div class="card-valid">Berlaku Selama:<br><strong>Menjadi Anggota</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="id-card id-card-back" id="idCardBack">
+                         <h5>TATA TERTIB PERPUSTAKAAN<br>SMP HAMALATUL QURAN</h5>
+                        <ul class="rules-list">
+                            <li>Setiap pengunjung wajib mengisi daftar kunjungan perpustakaan.</li>
+                            <li>Buku yang dipinjam harus dicatat sesuai prosedur peminjaman.</li>
+                            <li>Pengunjung dilarang membawa keluar buku tanpa izin petugas.</li>
+                            <li>Buku yang dipinjam wajib dikembalikan tepat waktu sesuai batas batas tanggal.</li>
+                            <li>Pengunjung wajib mengganti buku yang hilang atau rusak sesuai ketentuan.</li>
+                         </ul>
+                        <div class="card-bottom" style="border:none; padding:0; justify-content:center;">
+                            <div class="card-valid" style="text-align:center; color:#fff; font-size:8px; opacity:0.8;">Harap menjaga kartu ini dengan baik.</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" id="btnPrint" style="margin-top:20px; display:none;" onclick="window.print()">Cetak / Print Kartu</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let bookIdCounter = 1002;
+        let loanIdCounter = 2;
+        let memberIdCounter = 2;
+
+        function switchTab(menuId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+
+            document.getElementById(menuId).classList.add('active');
+            
+            // Mengatasi error 'event is not defined' di beberapa browser mobile
+            if(window.event) {
+                window.event.currentTarget.classList.add('active');
+            } else {
+                // Alternatif pencarian manual jika target event tidak langsung terbaca
+                const targetLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.getAttribute('onclick').includes(menuId));
+                if(targetLink) targetLink.classList.add('active');
+            }
+        }
+
+        function tambahBuku(event) {
+            event.preventDefault();
+            const judul = document.getElementById('judul').value;
+            const penulis = document.getElementById('penulis').value;
+            const tahun = document.getElementById('tahun').value;
+            const stok = document.getElementById('stok').value;
+
+            const tableBody = document.getElementById('bookTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>B-${bookIdCounter++}</td>
+                <td><strong>${judul}</strong></td>
+                <td>${penulis}</td>
+                <td>${tahun}</td>
+                <td>${stok}</td>
+                <td><button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button></td>
+            `;
+            tableBody.appendChild(newRow);
+            document.getElementById('bookForm').reset();
+        }
+
+        function tambahPeminjam(event) {
+            event.preventDefault();
+            const nama = document.getElementById('namaPeminjam').value;
+            const judul = document.getElementById('judulPinjam').value;
+            const kategori = document.getElementById('kategoriPinjam').value;
+            const tanggal = document.getElementById('tanggalPinjam').value;
+
+            const tableBody = document.getElementById('bookTableBodyLoan');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${loanIdCounter++}</td>
+                <td><strong>${nama}</strong></td>
+                <td>${judul}</td>
+                <td>${kategori}</td>
+                <td>${tanggal}</td>
+                <td><span class="badge badge-waiting">Masih Dipinjam</span></td>
+                <td class="nama-penerima">-</td>
+                <td>
+                    <button class="btn btn-warning" onclick="kembalikanBuku(this)">Kembalikan</button>
+                    <button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+            document.getElementById('loanForm').reset();
+        }
+
+        function kembalikanBuku(button) {
+            const row = button.parentElement.parentElement;
+            const badgeStatus = row.querySelector('.badge');
+            const kolomPenerima = row.querySelector('.nama-penerima');
+
+            if (badgeStatus.classList.contains('badge-success')) {
+                alert("Buku ini sudah dikembalikan sebelumnya!");
+                return;
+            }
+
+            const penerima = prompt("Masukkan Nama Petugas / Penerima Buku:");
+            
+            if (penerima === null || penerima.trim() === "") {
+                alert("Proses dibatalkan. Nama penerima harus diisi!");
+            } else {
+                badgeStatus.className = "badge badge-success";
+                badgeStatus.innerText = "Sudah Dikembalikan";
+                kolomPenerima.innerHTML = `<strong>${penerima}</strong>`;
+                button.style.display = "none";
+                alert("Status berhasil diperbarui menjadi Sudah Dikembalikan!");
+            }
+        }
+
+        function tambahAnggota(event) {
+            event.preventDefault();
+            const nama = document.getElementById('namaAnggota').value;
+            const status = document.getElementById('statusAnggota').value;
+            const kontak = document.getElementById('kontakAnggota').value;
+
+            const tableBody = document.getElementById('tabelAnggotaBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>A-00${memberIdCounter++}</td>
+                <td>${nama}</td>
+                <td>${status}</td>
+                <td>${kontak}</td>
+                <td><button class="btn btn-danger" onclick="hapusBaris(this)">Hapus</button></td>
+            `;
+            tableBody.appendChild(newRow);
+            document.getElementById('formAnggota').reset();
+        }
+
+        function generateCard(event) {
+            event.preventDefault();
+            const nama = document.getElementById('inputNama').value;
+            const status = document.getElementById('inputStatus').value;
+            const instansi = document.getElementById('inputInstansi').value;
+            const fotoInput = document.getElementById('inputFoto');
+            const randomID = "REG-2026" + Math.floor(1000 + Math.random() * 9000);
+
+            if (fotoInput.files && fotoInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const avatarBox = document.getElementById('cardAvatarBox');
+                    avatarBox.innerHTML = `<img src="${e.target.result}" alt="Foto Anggota">`;
+                    
+                    document.getElementById('cardNama').innerText = nama.toUpperCase();
+                    document.getElementById('cardStatus').innerText = status;
+                    document.getElementById('cardInstansi').innerText = instansi.toUpperCase();
+                    document.getElementById('cardId').innerText = randomID;
+
+                    document.getElementById('idCard').style.display = 'flex';
+                    document.getElementById('idCardBack').style.display = 'flex';
+                    document.getElementById('btnPrint').style.display = 'block';
+                    
+                    alert("Kartu Anggota Berhasil Diproses dengan Foto!");
+                };
+                
+                reader.readAsDataURL(fotoInput.files[0]);
+            } else {
+                alert("Silakan pilih file foto terlebih dahulu!");
+            }
+        }
+
+        function hapusBaris(button) {
+            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                const row = button.parentElement.parentElement;
+                row.remove();
+            }
+        }
+    </script>
+</body>
+</html>
